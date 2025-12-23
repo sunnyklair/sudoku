@@ -3,7 +3,7 @@ use bevy::prelude::*;
 fn main() {
     App::new() 
         .add_systems(Startup, setup)
-        .add_systems(Update, (handle_cursor_input, update_cursor_position))
+        .add_systems(Update, (handle_cursor_input, handle_mouse_hover, update_cursor_position))
         .add_plugins(DefaultPlugins)
         .run();
 }
@@ -57,7 +57,7 @@ fn handle_cursor_input(
 ) {
     // Query the cursor component (only one cursor exists)
     if let Ok(mut cursor) = cursor_query.single_mut() {
-        let max_index = 2; // We have 3 menu items (0, 1, 2)
+        let max_index = 1; // We have 2 menu items (0, 1)
         
         // Move cursor down (increase index)
         if keyboard.just_pressed(KeyCode::ArrowDown) || keyboard.just_pressed(KeyCode::KeyS) {
@@ -67,6 +67,54 @@ fn handle_cursor_input(
         // Move cursor up (decrease index)
         if keyboard.just_pressed(KeyCode::ArrowUp) || keyboard.just_pressed(KeyCode::KeyW) {
             cursor.selected_index = cursor.selected_index.saturating_sub(1);
+        }
+    }
+}
+
+// System: Handle mouse hover to select menu items
+fn handle_mouse_hover(
+    windows: Query<&Window>,
+    camera_query: Query<(&Camera, &GlobalTransform)>,
+    menu_items_query: Query<(&MenuItem, &Transform)>,
+    mut cursor_query: Query<&mut MenuCursor>,
+) {
+    // Get the primary window and camera
+    // Using Result type annotations for clarity
+    let window: &Window = match windows.single() {
+        Ok(w) => w,
+        Err(_) => return,
+    };
+    
+    let (camera, camera_transform): (&Camera, &GlobalTransform) = match camera_query.single() {
+        Ok(c) => c,
+        Err(_) => return,
+    };
+    
+    // Get the cursor position in the window
+    let Some(cursor_pos) = window.cursor_position() else {
+        return; // Cursor not in window
+    };
+    
+    // Convert screen coordinates to world coordinates
+    // In Bevy 0.17, viewport_to_world_2d returns a Result
+    let Ok(world_pos) = camera.viewport_to_world_2d(camera_transform, cursor_pos) else {
+        return;
+    };
+    
+    // Check which menu item is being hovered over
+    // We'll use a simple distance check (items are about 50 pixels apart vertically)
+    let hover_threshold = 25.0; // Half the spacing between items
+    
+    for (menu_item, item_transform) in menu_items_query.iter() {
+        let item_pos = item_transform.translation.truncate(); // Convert Vec3 to Vec2
+        let distance = world_pos.distance(item_pos);
+        
+        // If mouse is close to this item, select it
+        if distance < hover_threshold {
+            if let Ok(mut cursor) = cursor_query.single_mut() {
+                cursor.selected_index = menu_item.index;
+            }
+            break;
         }
     }
 }
