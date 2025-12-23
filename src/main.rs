@@ -1,6 +1,7 @@
 mod plugins;
-use bevy::prelude::*;
 use plugins::MenuPlugin;
+
+use bevy::prelude::*;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum GameState {
@@ -12,11 +13,8 @@ enum GameState {
 
 fn main() {
     App::new()
-    .add_systems(Startup, setup)
-        .add_plugins((
-            DefaultPlugins,
-            MenuPlugin,
-        ))
+        .add_systems(Startup, setup)
+        .add_plugins((DefaultPlugins, MenuPlugin))
         .init_state::<GameState>()
         .run();
 }
