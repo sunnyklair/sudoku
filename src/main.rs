@@ -29,11 +29,9 @@ struct MenuCursor {
 }
 
 #[derive(Component)]
-struct MenuItem {
-    index: usize,
-}
+struct MenuItem; // Marker component for filtering
 
-// Stores references to menu item entities for quick lookup
+// Stores menu item entities in order (index = position in Vec)
 #[derive(Resource)]
 struct MenuItems(Vec<Entity>);
 
@@ -45,17 +43,20 @@ fn setup(mut commands: Commands) {
         Transform::from_translation(Vec3::new(0.0, TITLE_Y, 0.0)),
     ));
     
-    // Spawn menu items and store their entity references
-    let mut menu_entities = Vec::new();
-    for (index, &item_text) in MENU_ITEMS.iter().enumerate() {
-        let y_pos = MENU_START_Y - (index as f32 * MENU_SPACING);
-        let entity = commands.spawn((
-            Text2d::new(item_text),
-            Transform::from_translation(Vec3::new(0.0, y_pos, 0.0)),
-            MenuItem { index },
-        )).id();
-        menu_entities.push(entity);
-    }
+    // Spawn menu items and store their entity references in order
+    let menu_entities: Vec<Entity> = MENU_ITEMS
+        .iter()
+        .enumerate()
+        .map(|(index, &item_text)| {
+            let y_pos = MENU_START_Y - (index as f32 * MENU_SPACING);
+            commands.spawn((
+                Text2d::new(item_text),
+                Transform::from_translation(Vec3::new(0.0, y_pos, 0.0)),
+                MenuItem,
+            )).id()
+        })
+        .collect();
+    
     commands.insert_resource(MenuItems(menu_entities));
     
     commands.spawn((
@@ -84,10 +85,10 @@ fn handle_cursor_input(
 fn handle_mouse_hover(
     mut cursor_moved: MessageReader<CursorMoved>,
     camera: Single<(&Camera, &GlobalTransform)>,
-    menu_items: Query<(&MenuItem, &Transform)>,
+    menu_items: Res<MenuItems>,
+    transforms: Query<&Transform, With<MenuItem>>,
     mut menu_cursor: Single<&mut MenuCursor>,
 ) {
-    // Only process if mouse actually moved (event fired)
     let Some(cursor_event) = cursor_moved.read().last() else {
         return; // No movement this frame
     };
@@ -96,12 +97,15 @@ fn handle_mouse_hover(
         .viewport_to_world_2d(camera.1, cursor_event.position)
         .expect("viewport conversion should succeed");
     
-    for (menu_item, item_transform) in menu_items.iter() {
-        let item_pos = item_transform.translation.truncate();
-        
-        if world_pos.distance(item_pos) < HOVER_THRESHOLD {
-            menu_cursor.selected_index = menu_item.index;
-            break;
+    // Check each menu item by index
+    for (index, &entity) in menu_items.0.iter().enumerate() {
+        if let Ok(item_transform) = transforms.get(entity) {
+            let item_pos = item_transform.translation.truncate();
+            
+            if world_pos.distance(item_pos) < HOVER_THRESHOLD {
+                menu_cursor.selected_index = index;
+                break;
+            }
         }
     }
 }
