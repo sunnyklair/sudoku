@@ -38,8 +38,6 @@ struct MenuItem;
 struct MenuItems(Vec<Entity>);
 
 fn setup_menu(mut commands: Commands) {
-    commands.spawn(Camera2d::default());
-    
     commands.spawn((
         Text2d::new("Sudoku"),
         Transform::from_translation(Vec3::new(0.0, TITLE_Y, 0.0)),
@@ -126,3 +124,4 @@ fn update_menu_cursor_position(
         }
     }
 }
+
