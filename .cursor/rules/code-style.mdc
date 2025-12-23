@@ -1,0 +1,43 @@
+---
+description: Code style, organization, and naming conventions
+globs: **/*.rs
+alwaysApply: true
+---
+
+# Code Style Preferences
+
+## Formatting & Organization
+- Follow standard Rust conventions (rustfmt defaults)
+- Group imports: std, external crates, local modules
+- Use `//` comments for brief explanations, `///` for doc comments
+- Prefer explicit types when learning (I'll remove them once comfortable)
+
+## Code Organization
+```
+src/
+├── main.rs           # App entry point and plugin registration
+├── lib.rs            # Optional: library interface
+├── plugins/          # Feature plugins
+│   ├── mod.rs
+│   ├── player.rs
+│   ├── enemies.rs
+│   └── ui.rs
+├── components/       # Component definitions
+├── systems/          # System functions  
+├── resources/        # Resource definitions
+└── events/           # Event definitions
+```
+
+## Naming Conventions
+- Components: noun (e.g., `Player`, `Velocity`, `Health`)
+- Systems: verb_noun (e.g., `move_player`, `spawn_enemies`, `handle_collisions`)
+- Events: noun_verb (e.g., `PlayerDied`, `LevelCompleted`)
+- Resources: noun (e.g., `GameState`, `ScoreBoard`)
+
+## Useful Commands
+```bash
+cargo run                    # Run the game
+cargo run --release          # Run optimized
+cargo clippy                 # Linting
+cargo doc --open            # Generate docs
+```

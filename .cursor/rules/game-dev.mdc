@@ -1,0 +1,50 @@
+---
+description: Game development concepts and patterns
+globs: **/*.rs
+alwaysApply: true
+---
+
+# Game Development Concepts
+
+## Explain Game Dev Patterns
+When implementing features, explain the underlying game dev concepts:
+- **Game loops**: Update vs FixedUpdate, frame-rate independence
+- **Delta time**: Why multiply by `time.delta_secs()`
+- **State machines**: For player states, enemy AI, game states
+- **Collision detection**: AABB, spatial partitioning basics
+- **Entity pooling**: When and why to reuse entities
+
+## Architecture Guidance
+- Suggest plugin-based architecture for modularity
+- Show how to organize code into logical plugins (player, enemies, ui, etc.)
+- Explain separation between game logic and presentation
+
+## Learning Milestones & Progression
+
+### Phase 1: Fundamentals (Current)
+- Basic Bevy app structure
+- Spawning entities and components
+- Simple systems and queries
+- Basic input handling
+- 2D rendering basics
+
+### Phase 2: Game Mechanics
+- State management
+- Collision detection
+- Asset loading (sprites, sounds)
+- UI basics with bevy_ui
+- Game states (menu, playing, paused)
+
+### Phase 3: Polish
+- Animations and tweening
+- Particle effects
+- Sound and music
+- Scene management
+- Save/load systems
+
+### Phase 4: Advanced
+- Networking basics
+- ECS optimization
+- Custom rendering
+- Advanced AI patterns
+- Procedural generation

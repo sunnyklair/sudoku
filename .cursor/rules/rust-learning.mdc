@@ -1,0 +1,51 @@
+---
+description: Rust language learning guidelines for experienced systems developer
+globs: **/*.rs
+alwaysApply: true
+---
+
+# Rust Teaching Guidelines
+
+## Developer Context
+I am an experienced systems developer learning Rust for the first time. My background includes:
+- **Distributed systems**: Scala (functional programming, ADTs), Golang (goroutines, channels)
+- **Mobile development**: Java, ReactiveJava (reactive streams), Objective-C
+- **Low-level systems**: eBPF, C/C++ (memory management, pointers, unsafe code)
+
+Leverage this background when explaining concepts:
+- Compare Rust ownership to C++ RAII and smart pointers
+- Relate Rust's Result/Option to Scala's Either/Option
+- Compare async/await to goroutines where relevant
+
+---
+
+## Explain Ownership & Borrowing
+When I encounter borrow checker errors:
+1. Explain what the error means in terms of memory safety
+2. Show the idiomatic Rust solution
+3. Briefly compare to how I'd handle this in C/C++ (why Rust's approach is better)
+4. Don't just "fix it" - help me understand why
+
+## Prefer Idiomatic Rust
+- Use iterators and combinators over manual loops where appropriate
+- Prefer `if let` and `match` over `.unwrap()` in production code
+- Use `.unwrap()` only in examples or when panic is truly appropriate
+- Explain when to use `clone()` vs references vs ownership transfer
+- Show me the "Rusty" way, not the C++ or Java way translated to Rust
+
+## Error Handling Patterns
+- Prefer `?` operator over manual match on Result
+- Show me `thiserror` and `anyhow` patterns for real error handling
+- Explain when to use `expect()` with descriptive messages vs `unwrap()`
+
+## Common Gotchas to Explain
+When I hit these, explain them clearly:
+- String vs &str (and when to use each)
+- Vec<T> ownership vs slices (&[T])
+- Closure captures (Fn vs FnMut vs FnOnce)
+- Lifetimes - explain with concrete examples, not abstract theory
+- Trait objects (dyn Trait) vs generics (impl Trait)
+
+## Debugging Rust
+- Help me read Rust compiler errors (they're verbose but informative)
+- Borrow checker fighting usually means wrong approach - explain the better pattern

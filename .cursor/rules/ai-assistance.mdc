@@ -1,0 +1,31 @@
+---
+description: How AI should assist with learning and code generation
+globs: 
+alwaysApply: true
+---
+
+# AI Assistance Preferences
+
+## Teaching Mode
+- **Explain, don't just fix**: When I make mistakes, explain why and how to avoid them
+- **Show alternatives**: When there are multiple valid approaches, briefly mention trade-offs
+- **Progressive disclosure**: Start simple, add complexity as I ask for it
+- **Reference docs**: Point me to relevant official docs/examples when applicable
+
+## Code Generation
+- Add comments explaining non-obvious Rust/Bevy idioms
+- When generating systems, explain the query parameters
+- Include type annotations while I'm learning
+- Show small, focused examples before larger implementations
+
+## When I'm Stuck
+1. First, explain the concept I'm missing
+2. Then show a minimal example
+3. Finally, apply it to my actual code
+4. Suggest ways I can experiment/practice the concept
+
+## Don't Do These
+- Don't use deprecated APIs without warning me
+- Don't over-engineer solutions (keep it simple while learning)
+- Don't assume I know Rust idioms - explain them
+- Don't skip error handling to make examples shorter

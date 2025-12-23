@@ -1,0 +1,78 @@
+---
+description: Bevy engine and ECS guidelines
+globs: **/*.rs
+alwaysApply: true
+---
+
+# Bevy-Specific Guidelines
+
+## Version Awareness
+- **Current Bevy version**: 0.17.3
+- Bevy APIs change significantly between versions - always verify patterns are valid for 0.17.x
+- If suggesting code from examples or docs, confirm it matches current API
+
+## ECS Fundamentals
+Always reinforce these core concepts:
+- **Entities**: Just IDs (like database primary keys)
+- **Components**: Pure data structs, no behavior
+- **Systems**: Functions that operate on components
+- **Resources**: Global singleton data
+- **Events**: Decoupled communication between systems
+
+When I'm confused about ECS, relate it to:
+- Components as data classes (similar to Scala case classes)
+- Systems as reactive observers (similar to ReactiveJava operators)
+- Resources as dependency-injected singletons
+
+## Bevy Best Practices
+1. **System ordering**: Explain `before()`, `after()`, and system sets
+2. **Queries**: Show efficient query patterns, explain `With<T>`, `Without<T>`, `Changed<T>`
+3. **Commands**: Explain deferred execution model (why commands don't execute immediately)
+4. **States**: Use `States` for game states (Menu, Playing, Paused)
+5. **Events**: Prefer events over direct component mutation for cross-system communication
+
+## Common Bevy Patterns to Teach
+- Spawning entities with bundles
+- Querying and filtering entities
+- Handling input (keyboard, mouse, gamepad)
+- Asset loading (async nature, handle vs actual asset)
+- Scene management and transitions
+- Parent/child entity relationships
+- Change detection with `Changed<T>` and `Added<T>`
+
+## Bevy 0.17 Specific Notes
+- Use the new `required_components` pattern over Bundles where appropriate
+- Camera setup uses `Camera2d` / `Camera3d` components directly
+- Transform is separate from GlobalTransform
+- Visibility uses `Visibility` component
+
+## Common Issues to Watch For
+- Missing `#[derive(...)]` on components
+- System not running (check system sets and conditions)
+- Entities not spawning (check if using Commands correctly)
+- Assets not loading (async loading, check handles)
+- Explain Bevy's runtime warnings and what they mean
+- Guide me through using `bevy_inspector_egui` for debugging
+- Show logging patterns with `info!`, `debug!`, `warn!`
+
+## Quick Reference
+
+### Essential Bevy Imports
+```rust
+use bevy::prelude::*;  // Most common items
+```
+
+### Basic System Signature
+```rust
+fn my_system(
+    mut commands: Commands,                    // Spawn/despawn entities
+    query: Query<&Component, With<Filter>>,    // Query entities
+    mut query: Query<&mut Component>,          // Mutable query
+    time: Res<Time>,                           // Time resource
+    keyboard: Res<ButtonInput<KeyCode>>,       // Keyboard input
+    mut events: EventReader<MyEvent>,          // Read events
+    mut writer: EventWriter<MyEvent>,          // Write events
+) {
+    // System logic
+}
+```
