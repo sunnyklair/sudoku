@@ -14,9 +14,10 @@ fn main() {
         .add_systems(
             Update, 
             (
-                (handle_cursor_input, handle_mouse_hover),
+                handle_cursor_input,
+                handle_mouse_hover,
                 update_cursor_position,
-            ).chain(), // Ensures cursor position updates after inputs
+            ).chain(), // Keyboard -> Mouse -> Position update (in that order)
         )
         .add_plugins(DefaultPlugins)
         .run();
@@ -58,12 +59,8 @@ fn setup(mut commands: Commands) {
 
 fn handle_cursor_input(
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut cursor_query: Query<&mut MenuCursor>,
+    mut cursor: Single<&mut MenuCursor>,
 ) {
-    let mut cursor = cursor_query
-        .single_mut()
-        .expect("exactly one MenuCursor should exist");
-    
     let max_index = MENU_ITEMS.len() - 1;
     
     if keyboard.just_pressed(KeyCode::ArrowDown) || keyboard.just_pressed(KeyCode::KeyS) {
@@ -76,32 +73,25 @@ fn handle_cursor_input(
 }
 
 fn handle_mouse_hover(
-    windows: Query<&Window>,
-    camera_query: Query<(&Camera, &GlobalTransform)>,
-    menu_items_query: Query<(&MenuItem, &Transform)>,
-    mut cursor_query: Query<&mut MenuCursor>,
+    mut cursor_moved: MessageReader<CursorMoved>,
+    camera: Single<(&Camera, &GlobalTransform)>,
+    menu_items: Query<(&MenuItem, &Transform)>,
+    mut menu_cursor: Single<&mut MenuCursor>,
 ) {
-    let window = windows.single().expect("primary window should exist");
-    let (camera, camera_transform) = camera_query.single().expect("camera should exist");
-    
-    // Early return if cursor is outside window (expected behavior)
-    let Some(cursor_pos) = window.cursor_position() else { 
-        return;
+    // Only process if mouse actually moved (event fired)
+    let Some(cursor_event) = cursor_moved.read().last() else {
+        return; // No movement this frame
     };
     
-    let world_pos = camera
-        .viewport_to_world_2d(camera_transform, cursor_pos)
+    let world_pos = camera.0
+        .viewport_to_world_2d(camera.1, cursor_event.position)
         .expect("viewport conversion should succeed");
     
-    let mut cursor = cursor_query
-        .single_mut()
-        .expect("exactly one MenuCursor should exist");
-    
-    for (menu_item, item_transform) in menu_items_query.iter() {
+    for (menu_item, item_transform) in menu_items.iter() {
         let item_pos = item_transform.translation.truncate();
         
         if world_pos.distance(item_pos) < HOVER_THRESHOLD {
-            cursor.selected_index = menu_item.index;
+            menu_cursor.selected_index = menu_item.index;
             break;
         }
     }
@@ -109,15 +99,14 @@ fn handle_mouse_hover(
 
 fn update_cursor_position(
     mut cursor_query: Query<(&MenuCursor, &mut Transform), Changed<MenuCursor>>,
-    menu_items_query: Query<(&MenuItem, &Transform), Without<MenuCursor>>,
+    menu_items: Query<(&MenuItem, &Transform), Without<MenuCursor>>,
 ) {
-    // Early return if cursor hasn't changed (Changed<> filter optimization)
-    let Ok((cursor, mut cursor_transform)) = cursor_query.single_mut() else {
+    let Ok((menu_cursor, mut cursor_transform)) = cursor_query.single_mut() else {
         return; // No cursor changed this frame
     };
     
-    for (menu_item, item_transform) in menu_items_query.iter() {
-        if menu_item.index == cursor.selected_index {
+    for (menu_item, item_transform) in menu_items.iter() {
+        if menu_item.index == menu_cursor.selected_index {
             cursor_transform.translation.y = item_transform.translation.y;
             break;
         }
